@@ -1,6 +1,6 @@
 package com.geekbrains.lesson1.obstacles;
 
-import com.geekbrains.lesson1.Participant;
+import com.geekbrains.lesson1.participants.Participant;
 
 public class Treadmill implements Obstacle {
     private int distance;
@@ -9,7 +9,12 @@ public class Treadmill implements Obstacle {
         this.distance = distance;
     }
 
-    public boolean canRun(Participant participant) {
+    public boolean canOvercome(Participant participant) {
         return participant.run() >= distance;
+    }
+
+    @Override
+    public String toString() {
+        return "Treadmill";
     }
 }

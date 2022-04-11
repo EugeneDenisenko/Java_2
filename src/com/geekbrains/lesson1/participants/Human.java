@@ -1,4 +1,4 @@
-package com.geekbrains.lesson1;
+package com.geekbrains.lesson1.participants;
 
 public class Human implements Participant {
     @Override

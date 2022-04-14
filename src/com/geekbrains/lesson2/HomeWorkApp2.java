@@ -1,23 +1,53 @@
 package com.geekbrains.lesson2;
 
 public class HomeWorkApp2 {
+
+    public static final int SIZE = 4;
+
     public static void main(String[] args) {
+        String[][] array =
+                {{"1", "1", "1", "1"},
+                        {"1", "1", "1", "1"},
+                        {"1", "1", "1", "1"},
+                        {"1", "1", "1", "1"}};
 
-        String[][] array = new String[4][4];
-
-        try  {
-            sumElement(array);
-        } catch (MyArraySizeException exception) {
+        try {
+            int sum = sumOfElements(array);
+            System.out.println("Сумма элементов массива: " + sum);
+        } catch (MyArraySizeException | MyArrayDataException exception) {
+            System.out.println(exception.getMessage());
             System.out.println("Завершение программы.");
         }
-
     }
 
-    private static void sumElement(String[][] array) {
-        if (array.length != 4 | array[0].length != 4) {
-            throw new MyArraySizeException("Массив не соответствует размеру 4х4.");
+    private static int sumOfElements(String[][] array) {
+        if (!checkSize(array)) {
+            throw new MyArraySizeException(SIZE);
         } else {
-            System.out.println("Выполнение");
+            int count = 0;
+            int num;
+            for (int i = 0; i < array.length; i++) {
+                for (int j = 0; j < array[i].length; j++) {
+                    try {
+                        num = Integer.parseInt(array[i][j]);
+                        count += num;
+                    } catch (NumberFormatException e) {
+                        throw new MyArrayDataException(i, j);
+                    }
+                }
+            }
+            return count;
         }
+    }
+
+    private static boolean checkSize(String[][] array) {
+        boolean flag = true;
+        for (String[] strings : array) {
+            if (strings.length != SIZE) {
+                flag = false;
+                break;
+            }
+        }
+        return (array.length == SIZE) & flag;
     }
 }

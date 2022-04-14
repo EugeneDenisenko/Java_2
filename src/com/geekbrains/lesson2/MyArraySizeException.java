@@ -1,8 +1,8 @@
 package com.geekbrains.lesson2;
 
-public class MyArraySizeException extends RuntimeException{
+public class MyArraySizeException extends RuntimeException {
 
-    public MyArraySizeException(String message) {
-        System.out.println(message);
+    public MyArraySizeException(int size) {
+        super(String.format("Массив не соответствует размеру [%d][%d]", size, size));
     }
 }

@@ -50,6 +50,8 @@ cmake-build-*/
 .idea/**/mongoSettings.xml
 
 # File-based project format
+*.class
+*.lst
 *.iws
 
 # IntelliJ

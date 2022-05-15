@@ -14,9 +14,9 @@
     <bottom>
         <HBox prefHeight="25.0" prefWidth="200.0" BorderPane.alignment="CENTER">
             <children>
-                <TextField fx:id="messageField" onAction="#appendMessageToChat" prefHeight="26.0" prefWidth="487.0"/>
+                <TextField fx:id="messageTextArea" onAction="#sendMessage" prefHeight="26.0" prefWidth="487.0"/>
                 <Button fx:id="sendMessageButton" maxWidth="-Infinity" mnemonicParsing="false"
-                        onAction="#appendMessageToChat" text="Отправить">
+                        onAction="#sendMessage" text="Отправить">
                     <HBox.margin>
                         <Insets left="20.0" right="5.0"/>
                     </HBox.margin>
@@ -30,7 +30,7 @@
             <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                     <children>
-                        <TextArea fx:id="messageTextArea" prefHeight="200.0" prefWidth="200.0"
+                        <TextArea fx:id="chatTextArea" prefHeight="200.0" prefWidth="200.0"
                                   style="-fx-border-width: 2px;" AnchorPane.bottomAnchor="0.0"
                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
                     </children>

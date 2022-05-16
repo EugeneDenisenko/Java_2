@@ -1,5 +1,7 @@
-package com.geekbrains.ckientchat;
+package com.geekbrains.ckientchat.controllers;
 
+import com.geekbrains.ckientchat.ClientChat;
+import com.geekbrains.ckientchat.Network;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -27,7 +29,6 @@ public class ClientController {
     public ListView userList;
 
     private ClientChat application;
-    private Network network;
 
     public void sendMessage() {
         String message = messageTextArea.getText();
@@ -35,7 +36,7 @@ public class ClientController {
         messageTextArea.requestFocus();
         appendMessageToChat(message);
         try {
-            network.sendMessage(message);
+            Network.getInstance().sendMessage(message);
         } catch (IOException e) {
             application.showErrorDialog("Ошибка передачи данных по сети.");
         }
@@ -66,13 +67,8 @@ public class ClientController {
         this.application = application;
     }
 
-    public Network getNetwork() {
-        return network;
-    }
-
-    public void setNetwork(Network network) {
-        this.network = network;
-        network.waitMessages(new Consumer<String>() {
+    public void initializeMessageHandler() {
+        Network.getInstance().waitMessages(new Consumer<String>() {
             @Override
             public void accept(String message) {
                 appendMessageToChat(message);

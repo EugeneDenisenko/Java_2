@@ -1,5 +1,7 @@
-package com.geekbrains.ckientchat;
+package com.geekbrains.ckientchat.controllers;
 
+import com.geekbrains.ckientchat.ClientChat;
+import com.geekbrains.ckientchat.Network;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -27,26 +29,38 @@ public class ClientController {
     public ListView userList;
 
     private ClientChat application;
-    private Network network;
 
     public void sendMessage() {
         String message = messageTextArea.getText();
-        chatTextArea.appendText(DateFormat.getTimeInstance().format(new Date()) + " ");
-        messageTextArea.requestFocus();
-        appendMessageToChat(message);
+        if (message.isEmpty()) {
+            messageTextArea.clear();
+            return;
+        }
+        String sender = null;
+        if (!userList.getSelectionModel().isEmpty()) {
+            sender = userList.getSelectionModel().getSelectedItems().toString();
+        }
         try {
-            network.sendMessage(message);
+            message = sender != null ? String.format(": ", sender, message) : message;
+            Network.getInstance().sendMessage(message);
         } catch (IOException e) {
             application.showErrorDialog("Ошибка передачи данных по сети.");
         }
+        appendMessageToChat("Я: ",message);
     }
 
-    public void appendMessageToChat(String message) {
-        if (!message.isEmpty()) {
-            chatTextArea.appendText(message);
+    public void appendMessageToChat(String sender, String message) {
+        chatTextArea.appendText(DateFormat.getInstance().format(new Date()));
+        chatTextArea.appendText(System.lineSeparator());
+        if (sender != null) {
+            chatTextArea.appendText(sender + ": ");
             chatTextArea.appendText(System.lineSeparator());
-            messageTextArea.clear();
         }
+        chatTextArea.appendText(message);
+        chatTextArea.appendText(System.lineSeparator());
+        chatTextArea.appendText(System.lineSeparator());
+        messageTextArea.requestFocus();
+        messageTextArea.clear();
     }
 
     private void requestFocus() {
@@ -66,16 +80,11 @@ public class ClientController {
         this.application = application;
     }
 
-    public Network getNetwork() {
-        return network;
-    }
-
-    public void setNetwork(Network network) {
-        this.network = network;
-        network.waitMessages(new Consumer<String>() {
+    public void initializeMessageHandler() {
+        Network.getInstance().waitMessages(new Consumer<String>() {
             @Override
             public void accept(String message) {
-                appendMessageToChat(message);
+                appendMessageToChat("Server: ", message);
             }
         });
     }

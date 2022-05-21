@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/ClientChat/ClientChat.iml" filepath="$PROJECT_DIR$/ClientChat/ClientChat.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Commands/Commands.iml" filepath="$PROJECT_DIR$/Commands/Commands.iml" />
       <module fileurl="file://$PROJECT_DIR$/Java_2.iml" filepath="$PROJECT_DIR$/Java_2.iml" />
       <module fileurl="file://$PROJECT_DIR$/Server/Server.iml" filepath="$PROJECT_DIR$/Server/Server.iml" />
     </modules>

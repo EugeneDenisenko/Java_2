@@ -2,88 +2,77 @@ package com.geekbrains.ckientchat;
 
 import com.geekbrains.ckientchat.controllers.AuthController;
 import com.geekbrains.ckientchat.controllers.ClientController;
+import com.geekbrains.ckientchat.model.AuthTimeout;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-
 import java.io.IOException;
+import java.util.Timer;
 
 public class ClientChat extends Application {
 
+    private static ClientChat INSTANCE;
+
     private Stage chatStage;
     private Stage authStage;
+    private FXMLLoader chatWindowLoader;
+    private FXMLLoader authLoader;
+    private Timer mTimer;
+    private AuthTimeout mMyTimerTask;
 
     @Override
     public void start(Stage primaryStage) throws IOException {
         this.chatStage = primaryStage;
-        ClientController controller = createChatDialog(primaryStage);
-        connectToServer(controller);
-        createAuthDialog(primaryStage);
-        
-        controller.initializeMessageHandler();
+        initViews();
+        getAuthStage().show();
+        getAuthController().initializeMessageHandler();
     }
 
-    private void createAuthDialog(Stage primaryStage) throws IOException {
-        FXMLLoader authlLoader = new FXMLLoader();
-        authlLoader.setLocation(ClientChat.class.getResource("authDialog.fxml"));
-        AnchorPane authDialogPanel = authlLoader.load();
+    private void initViews() throws IOException {
+        initChatWindow();
+        initAuthDialog();
+    }
+
+    private void initChatWindow() throws IOException {
+        if (mTimer != null) {
+            mTimer.cancel();
+        }
+        mTimer = new Timer(true);
+        mMyTimerTask = new AuthTimeout();
+        chatWindowLoader = new FXMLLoader();
+        chatWindowLoader.setLocation(ClientChat.class.getResource("chat-template.fxml"));
+
+        Parent root = chatWindowLoader.load();
+        chatStage.setScene(new Scene(root));
+        getChatController().initializeMessageHandler();
+        mTimer.schedule(mMyTimerTask, 0);
+    }
+
+    private void initAuthDialog() throws IOException {
+        authLoader = new FXMLLoader();
+        authLoader.setLocation(ClientChat.class.getResource("authDialog.fxml"));
+        AnchorPane authDialogPanel = authLoader.load();
+
         authStage = new Stage();
-        authStage.initOwner(primaryStage);
+        authStage.initOwner(chatStage);
         authStage.initModality(Modality.WINDOW_MODAL);
         authStage.setScene(new Scene(authDialogPanel));
-
-        AuthController authController = authlLoader.getController();
-        authController.setClientChat(this);
-        authController.initialezeMessageHandler();
-        authStage.showAndWait();
     }
 
-    private ClientController createChatDialog(Stage primaryStage) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader();
-        fxmlLoader.setLocation(ClientChat.class.getResource("chat-template.fxml"));
-
-        Parent root = fxmlLoader.load();
-        Scene scene = new Scene(root);
-        this.chatStage.setTitle("Student project");
-        this.chatStage.setScene(scene);
-
-        ClientController controller = fxmlLoader.getController();
-        controller.userList.getItems().addAll("user1", "user2");
-
-        primaryStage.show();
-
-        return controller;
+    public void switchToMainChatWindow(String userName) {
+        getChatStage().setTitle(userName);
+        getAuthController().close();
+        getAuthStage().close();
+        getChatStage().show();
     }
 
-    private void connectToServer(ClientController clientController) {
-        boolean resultConnectedToServer = Network.getInstance().connect();
-        if (!resultConnectedToServer) {
-            String errorMessage = "Невозможно установить сетевое соединение.";
-            System.err.println(errorMessage);
-            showErrorDialog(errorMessage);
-        }
-
-        clientController.setApplication(this);
-        chatStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
-            @Override
-            public void handle(WindowEvent windowEvent) {
-                Network.getInstance().close();
-            }
-        });
-    }
-
-    public void showErrorDialog(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Ошибка");
-        alert.setContentText(message);
-        alert.showAndWait();
+    @Override
+    public void init() {
+        INSTANCE = this;
     }
 
     public static void main(String[] args) {
@@ -97,4 +86,18 @@ public class ClientChat extends Application {
     public Stage getChatStage() {
         return chatStage;
     }
+
+    public ClientController getChatController() {
+        return chatWindowLoader.getController();
+    }
+
+    public AuthController getAuthController() {
+        return authLoader.getController();
+    }
+
+    public static ClientChat getInstance() {
+        return INSTANCE;
+    }
+
+
 }

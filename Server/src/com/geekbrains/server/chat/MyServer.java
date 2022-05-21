@@ -1,5 +1,6 @@
 package com.geekbrains.server.chat;
 
+import com.geekbrains.command.Command;
 import com.geekbrains.server.chat.auth.AuthService;
 
 import java.io.IOException;
@@ -14,39 +15,68 @@ public class MyServer {
     private final List<ClientHandler> clients = new ArrayList<>();
 
     public void start(int port) {
-        try(ServerSocket serverSocket = new ServerSocket(port)) {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             System.out.println("Server has been started");
             authService = new AuthService();
             while (true) {
                 waitAndProcessClientConnection(serverSocket);
             }
         } catch (IOException e) {
-            System.out.println("Failed to bind port " + port);
+            System.err.println("Failed to bind port " + port);
         }
     }
 
     private void waitAndProcessClientConnection(ServerSocket serverSocket) throws IOException {
-            System.out.println("Waiting for new client connection");
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("Client has been connected");
-            ClientHandler clientHandler = new ClientHandler(this, clientSocket);
-            clientHandler.handle();
+        System.out.println("Waiting for new client connection");
+        Socket clientSocket = serverSocket.accept();
+        System.out.println("Client has been connected");
+        ClientHandler clientHandler = new ClientHandler(this, clientSocket);
+        clientHandler.handle();
     }
 
-    public void broadcastMessage(String message, ClientHandler sender) throws IOException {
+    public synchronized void broadcastMessage(String message, ClientHandler sender) throws IOException {
         for (ClientHandler client : clients) {
             if (client != sender) {
-                client.sendMessage(message);
+                client.sendCommand(Command.clientMessageCommand(sender.getUserName(), message));
             }
         }
     }
 
-    public void subscribe(ClientHandler clientHandler) {
-        clients.add(clientHandler);
+    public synchronized void sendPrivateMessage(ClientHandler sender, String recipient, String privateMessage) throws IOException {
+        for (ClientHandler client : clients) {
+            if (client != sender && client.getUserName().equals(recipient)) {
+                client.sendCommand(Command.clientMessageCommand(sender.getUserName(), privateMessage));
+            }
+        }
     }
 
-    public void unsubscribe(ClientHandler clientHandler) {
+    private void notifyUserListUpdated() throws IOException {
+        List<String> users = new ArrayList<>();
+        for (ClientHandler client : clients) {
+            users.add(client.getUserName());
+        }
+        for (ClientHandler client : clients) {
+            client.sendCommand(Command.updateUserListCommand(users));
+        }
+    }
+
+    public synchronized boolean isUserNameBusy(String userName) {
+        for (ClientHandler client : clients) {
+            if (client.getUserName().equals(userName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public synchronized void subscribe(ClientHandler clientHandler) throws IOException {
+        clients.add(clientHandler);
+        notifyUserListUpdated();
+    }
+
+    public synchronized void unsubscribe(ClientHandler clientHandler) throws IOException {
         clients.remove(clientHandler);
+        notifyUserListUpdated();
     }
 
     public AuthService getAuthService() {

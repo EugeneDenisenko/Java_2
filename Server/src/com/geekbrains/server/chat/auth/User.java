@@ -3,14 +3,15 @@ package com.geekbrains.server.chat.auth;
 import java.util.Objects;
 
 public class User {
+
     private final String login;
     private final String password;
-    private final String userName;
+    private final String username;
 
-    public User(String login, String password, String userName) {
+    public User(String login, String password, String username) {
         this.login = login;
         this.password = password;
-        this.userName = userName;
+        this.username = username;
     }
 
     public User(String login, String password) {
@@ -39,6 +40,6 @@ public class User {
     }
 
     public String getUserName() {
-        return userName;
+        return username;
     }
 }
